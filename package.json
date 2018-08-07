@@ -7,7 +7,9 @@
     "test": "jest"
   },
   "dependencies": {
-    "fk-platform-sdk": "^0.2.0-beta",
+    "@types/react": "^16.4.8",
+    "@types/react-native": "^0.49.5",
+    "fk-platform-sdk": "^0.2.1-beta",
     "jsrsasign": "^8.0.12",
     "react": "16.0.0-alpha.12",
     "react-native": "0.49.1",
