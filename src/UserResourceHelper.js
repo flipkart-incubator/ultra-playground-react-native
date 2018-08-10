@@ -1,7 +1,6 @@
 import FKPlatform from "fk-platform-sdk"
 var rs = require('jsrsasign');
-let clientId = "playground";
-let secret = "4FKzLsQDixo2tcP3nyzp8yq6jQq57cgy8ECQkiMHE7SlMiHy";
+
 
 let getSecureToken = function () {
     // Header
@@ -24,13 +23,12 @@ let getSecureToken = function () {
 export default class UserResouceHelper {
 
     constructor(fkPlatform) {
-        this.getToken = this.getToken.bind(this);
-        this.getTokenForCreds = this.getTokenForCreds.bind(this);
-        this.getTokenForMerchant = this.getTokenForMerchant.bind(this);
         this.fkPlatform = fkPlatform;
+        this.clientId = "playground";
+        this.secret = "4FKzLsQDixo2tcP3nyzp8yq6jQq57cgy8ECQkiMHE7SlMiHy";
     }
 
-    getTokenForMerchant(merchant, scope, stateChange) {
+    getMerchantCredential = (merchant) => {
         var merchantCredential;
         if (merchant == "mmt") {
             merchantCredential = {
@@ -44,120 +42,103 @@ export default class UserResouceHelper {
                 "password": "a4df1221a8ba0ffcda1a2a43046a2b0bae2518f5881210bb1e2ea003fc0038fa"
             };
         }
-        this.getTokenForCreds(merchantCredential, scope, stateChange);
+        return merchantCredential;
     }
 
-    getTokenForCreds(merchantCredential, scope, stateChange) {
-        var scopeReq = JSON.parse(scope);
-        this.fkPlatform.getModuleHelper().getPermissionsModule().getToken(scopeReq).then(function (e) {
-            let innerText = "Grant token : " + e.grantToken + "\n";
-            innerText += "result : " + JSON.stringify(e.result) + "\n";
-            stateChange(innerText);
+    getTokenForCreds = async (scope) => {
+        let scopeReq = JSON.parse(scope);
+        let response;
+        try {
+            let fkPlatformResponse = await this.fkPlatform.getModuleHelper().getPermissionsModule().getToken(scopeReq);
+            response = fkPlatformResponse.grantToken;
+        } catch (e) {
+            response = "Grant token error : " + e.message + " (code : " + e.code + ")\n";
+        }
+        return response;
+    }
 
-            fetch("https://platform.flipkart.net/1/authorization/auth?grantToken=" + e.grantToken + "&clientId=" + clientId + "&clientSecret=" + secret, {
-                headers: {
-                    'secureToken': getSecureToken()
-                }
-            }).then(
-                function (response) { return response.json() }).catch(
+    getIdentityToken = async (grantToken) => {
+        let response = await fetch("https://platform.flipkart.net/1/authorization/auth?grantToken=" + grantToken + "&clientId=" + this.clientId + "&clientSecret=" + this.secret, {
+            headers: {
+                'secureToken': getSecureToken()
+            }
+        }).then(
+            function (response) {
+                return response.json()
+            });
+        console.log('response', response);
+        return {
+            identityToken: response.RESPONSE.identityToken,
+            accessToken: response.RESPONSE.accessToken
+        };
+    }
 
-                    function (e) {
-                        innerText += "ID token error : " + e.message;
-                        stateChange(innerText);
-                    }.bind(this)).then(function (response) {
+    getUserInfo = async (postResourceBody, accessToken) => {
+        // ["user.mobile", "user.email", "user.accountId"];
+        let response = await fetch("https://platform.flipkart.net/1/resource/bulk?accessToken=" + accessToken, {
+            method: 'POST', body: JSON.stringify(postResourceBody), headers: {
+                'Content-Type': 'application/json',
+                'secureToken': getSecureToken()
+            }
+        }).then(
+            function (response) {
+                return response.json()
+            });
+        return response.RESPONSE;
+    }
 
-                        var idToken = response.RESPONSE.identityToken;
-                        innerText += "ID token : " + idToken + "\n";
-                        // localStorage.setItem("identityToken", idToken);
-                        var accessToken = response.RESPONSE.accessToken;
-                        innerText += "Access token : " + accessToken + "\n";
-                        stateChange(innerText);
+    startPayment = async (identityToken) => {
+        debugger;
+        var amountPaise = 500;
+        var adjustmentWrapper = {
+            "eligibleAdjustments": []
+        };
+        var payAdjustmentsArray = [];
+        for (var i = 0; i < payAdjustmentsArray.length; i++) {
+            var adj = payAdjustmentsArray[i];
+            adjustmentWrapper.eligibleAdjustments.push({
+                "adjustment_id": adj,
+                "offerUnitPrice": amountPaise
+            });
+        }
+        var postBody = {
+            "merchantTransactionId": "PLAYGROUND_" + Math.random().toString(36).slice(2).toUpperCase(),
+            "merchantReferenceId": "PLAYGROUND_" + Math.random().toString(36).slice(2).toUpperCase(),
+            "merchantCredential": this.getMerchantCredential(this.clientId),
+            "amountPaise": amountPaise,
+            "paymentExpiryMilliSeconds": 1200000,
+            "userInfo": {
+                "phone": "8554917721",
+                "email": "payments-qa@makemytrip.com",
+                "identityToken": identityToken
+            },
+            "adjustmentWrapper": adjustmentWrapper,
+            "successfulCallBackUrl": 'https://ultra-playground.herokuapp.com/payment-redirect.jsp?hack=mpay.makemytrip.com',
+            "failureCallBackUrl": 'https://ultra-playground.herokuapp.com/payment-redirect.jsp?hack=mpay.makemytrip.com',
+            "priceSummary": {
+                "basePricePaise": amountPaise,
+                "breakup": [
+                    {
+                        "displayText": "Convenience Fee",
+                        "valueInPaise": 0,
+                        "breakupType": "Default"
+                    }
+                ]
+            }
+        };
 
+        let response = await fetch("https://platform.flipkart.net/1/payment/token", {
+            method: 'POST', body: JSON.stringify(postBody), headers: new Headers({
+                'Content-Type': 'application/json',
+                'secureToken': getSecureToken()
+            })
+        }).then(function (response) { return response.json() });
+        console.log(response.RESPONSE);
+        return response.RESPONSE.token;
+    }
 
-                        var postResourceBody = ["user.mobile", "user.email", "user.accountId"];
-                        fetch("https://platform.flipkart.net/1/resource/bulk?accessToken=" + accessToken, {
-                            method: 'POST', body: JSON.stringify(postResourceBody), headers: {
-                                'Content-Type': 'application/json',
-                                'secureToken': getSecureToken()
-                            }
-                        }).then(
-                            function (response) { return response.json() }).then(function (response) {
-                                innerText += "Resources: " + JSON.stringify(response.RESPONSE) + "\n";
-                                stateChange(innerText);
-                            }.bind(this)).catch(function (err) {
-                                innerText += "Resource fetch error : " + err + "\n";
-                                stateChange(innerText);
-                            }.bind(this));
-                        var amountPaise = 500;
-                        var adjustmentWrapper = {
-                            "eligibleAdjustments": []
-                        };
-                        var payAdjustmentsArray = [];
-                        for (var i = 0; i < payAdjustmentsArray.length; i++) {
-                            var adj = payAdjustmentsArray[i];
-                            adjustmentWrapper.eligibleAdjustments.push({
-                                "adjustment_id": adj,
-                                "offerUnitPrice": amountPaise
-                            });
-                        }
-                        var postBody = {
-                            "merchantTransactionId": "PLAYGROUND_" + Math.random().toString(36).slice(2).toUpperCase(),
-                            "merchantReferenceId": "PLAYGROUND_" + Math.random().toString(36).slice(2).toUpperCase(),
-                            "merchantCredential": merchantCredential,
-                            "amountPaise": amountPaise,
-                            "paymentExpiryMilliSeconds": 1200000,
-                            "userInfo": {
-                                "phone": "8554917721",
-                                "email": "payments-qa@makemytrip.com",
-                                "identityToken": idToken
-                            },
-                            "adjustmentWrapper": adjustmentWrapper,
-                            "successfulCallBackUrl": 'https://ultra-playground.herokuapp.com/payment-redirect.jsp?hack=mpay.makemytrip.com',
-                            "failureCallBackUrl": 'https://ultra-playground.herokuapp.com/payment-redirect.jsp?hack=mpay.makemytrip.com',
-                            "priceSummary": {
-                                "basePricePaise": amountPaise,
-                                "breakup": [
-                                    {
-                                        "displayText": "Convenience Fee",
-                                        "valueInPaise": 0,
-                                        "breakupType": "Default"
-                                    }
-                                ]
-                            }
-                        };
-
-                        fetch("https://platform.flipkart.net/1/payment/token", {
-                            method: 'POST', body: JSON.stringify(postBody), headers: new Headers({
-                                'Content-Type': 'application/json',
-                                'secureToken': getSecureToken()
-                            })
-                        }).then(function (response) { return response.json() }).catch(function (e) { textDiv.innerText = "Payment token error : " + e.message; }.bind(this)).then(function (response) {
-
-                            var paymentToken = response.RESPONSE.token;
-                            innerText += "Payment token : " + paymentToken + "\n";
-                            stateChange(innerText);
-                            this.openPayments(paymentToken);
-
-                        }.bind(this))
-
-
-                    }.bind(this))
-
-        }.bind(this)).catch(function (e) {
-            let innerText = "Grant token error : " + e.message + " (code : " + e.code + ")\n";
-            stateChange(innerText);
-        }.bind(this));
-
-
-    };
-    openPayments(paymentToken) {
+    openPayments = (paymentToken) => {
         this.fkPlatform.getModuleHelper().getNavigationModule().startPayment(paymentToken);
     };
-
-    getToken(scope, stateChange) {
-        // var merchantSelect = document.getElementById("merchant");
-        // var merchant = merchantSelect.options[merchantSelect.selectedIndex].value;
-        this.getTokenForMerchant("playground", scope, stateChange);
-    }
 };
 
