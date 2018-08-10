@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TouchableHighlight, TextInput, Text, BackHandler, ScrollView } from 'react-native';
+import { View, StyleSheet, TouchableHighlight, TextInput, Text, BackHandler, ScrollView, AsyncStorage } from 'react-native';
 import FKPlatform from "fk-platform-sdk"
 import LinearGradient from 'react-native-linear-gradient';
 import UserResourceHelper from './UserResourceHelper';
@@ -15,7 +15,12 @@ export default class Demo extends Component {
             tokenOutput: '',
             contact: '',
             accessToken: '',
-            paymentToken: ''
+            paymentToken: '',
+            storedInfo: JSON.stringify({
+                key: 'key',
+                value: 'value'
+            }),
+            storedKey: 'key'
         };
         this.fkPlatform = new FKPlatform("playground");
         this.userResouceHelper = new UserResourceHelper(this.fkPlatform);
@@ -28,9 +33,9 @@ export default class Demo extends Component {
                 <View style={styles.container}>
                     <Text style={styles.title}>Demo</Text>
                     <Text style={styles.subTitle}>This demo will only work within the flipkart android app ultra's container. Click on Get Token button to request a token.</Text>
-                    <Text style={styles.subTitle}>Permission scope: </Text>
+                    <Text style={{ fontSize: 14, margin: 12, marginBottom: 12 }}>Permission scope: </Text>
                     <TextInput
-                        style={styles.permissionInput}
+                        style={[styles.permissionInput, { marginTop: 0 }]}
                         onChangeText={(text) => this.setState({ text })}
                         value={this.state.text}
                     />
@@ -45,9 +50,9 @@ export default class Demo extends Component {
                             Get Token
                     </Text>
                     </TouchableHighlight>
-                    <Text style={styles.subTitle}>Access token: </Text>
+                    <Text style={{ fontSize: 14, margin: 12, marginBottom: 12 }}>Access token: </Text>
                     <TextInput
-                        style={styles.permissionInput}
+                        style={[styles.permissionInput, { marginTop: 0 }]}
                         onChangeText={(text) => this.setState({ accessToken: text })}
                         value={this.state.accessToken}
                     />
@@ -56,8 +61,9 @@ export default class Demo extends Component {
                             Get Payment token
                     </Text>
                     </TouchableHighlight>
+                    <Text style={{ fontSize: 14, margin: 12, marginBottom: 12 }}>Payment token: </Text>
                     <TextInput
-                        style={styles.permissionInput}
+                        style={[styles.permissionInput, { marginTop: 0 }]}
                         onChangeText={(text) => this.setState({ paymentToken: text })}
                         value={this.state.paymentToken}
                     />
@@ -86,6 +92,27 @@ export default class Demo extends Component {
                         onChangeText={(text) => this.setState({ contact: text })}
                         value={this.state.contact}
                     />
+                    <Text style={{ fontSize: 14, margin: 12, marginBottom: 12 }}>Information to store: </Text>
+                    <TextInput
+                        style={[styles.permissionInput, { marginTop: 0 }]}
+                        onChangeText={(text) => this.setState({ storedInfo: text })}
+                        value={this.state.storedInfo}
+                    />
+                    <TouchableHighlight style={styles.getToken} onPress={this.storeInformation}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Store information
+                    </Text>
+                    </TouchableHighlight>
+                    <TextInput
+                        style={[styles.permissionInput, { marginTop: 0 }]}
+                        onChangeText={(text) => this.setState({ storedKey: text })}
+                        value={this.state.storedKey}
+                    />
+                    <TouchableHighlight style={styles.getToken} onPress={this.getInformation}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Retrieve information
+                    </Text>
+                    </TouchableHighlight>
                 </View>
             </ScrollView>
         );
@@ -122,13 +149,17 @@ export default class Demo extends Component {
         navigationModule.exitToHomePage();
     }
 
-    pickContact = () => {
-        let contactModule = this.fkPlatform.getModuleHelper().getContactsModule()
-        contactModule.pickPhoneNumber().then(function (response) {
-            this.setState({
-                contact: JSON.stringify(response.result)
-            });
-        }.bind(this));
+    pickContact = async () => {
+        let contactModule = this.fkPlatform.getModuleHelper().getContactsModule();
+        let response;
+        try {
+            response = (await contactModule.pickPhoneNumber()).result;
+        } catch (e) {
+            response = e.message
+        }
+        this.setState({
+            contact: response
+        });
     }
 
     getPaymentToken = async () => {
@@ -140,6 +171,30 @@ export default class Demo extends Component {
 
     startPayment = () => {
         this.userResouceHelper.openPayments(this.state.paymentToken);
+    }
+
+    storeInformation = async () => {
+        try {
+            let storedInfo = JSON.parse(this.state.storedInfo);
+            await AsyncStorage.setItem(storedInfo.key, storedInfo.value);
+        } catch (e) {
+            this.setState({
+                storedInfo: JSON.stringify(e)
+            });
+        }
+    }
+
+    getInformation = async () => {
+        try {
+            let response = await AsyncStorage.getItem(this.state.storedKey);
+            this.setState({
+                storedInfo: response.result
+            });
+        } catch (e) {
+            this.setState({
+                storedInfo: JSON.stringify(e)
+            });
+        }
     }
 }
 const styles = StyleSheet.create({
