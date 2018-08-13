@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TouchableHighlight, TextInput, Text, BackHandler } from 'react-native';
+import { View, StyleSheet, TouchableHighlight, TextInput, Text, BackHandler, ScrollView, AsyncStorage } from 'react-native';
 import FKPlatform from "fk-platform-sdk"
 import LinearGradient from 'react-native-linear-gradient';
 import UserResourceHelper from './UserResourceHelper';
@@ -13,112 +13,191 @@ export default class Demo extends Component {
         this.state = {
             text: '[{"scope":"user.email","isMandatory":true,"shouldVerify":false},{"scope":"user.mobile","isMandatory":false,"shouldVerify":false},{"scope":"user.name","isMandatory":false,"shouldVerify":false}]',
             tokenOutput: '',
-            contact: ''
+            contact: '',
+            accessToken: '',
+            paymentToken: '',
+            storedInfo: JSON.stringify({
+                key: 'key',
+                value: 'value'
+            }),
+            storedKey: 'key'
         };
-        this.getPermission = this.getPermission.bind(this);
-        this.exitSession = this.exitSession.bind(this);
-        this.exitToHomePage = this.exitToHomePage.bind(this);
-        this.pickContact = this.pickContact.bind(this);
-        this.stateChange = this.stateChange.bind(this);
         this.fkPlatform = new FKPlatform("playground");
         this.userResouceHelper = new UserResourceHelper(this.fkPlatform);
     }
 
-    stateChange(state) {
-        this.setState({
-            tokenOutput: state
-        });
-    }
     //This methods return CalenderRoot inside a completely stretched parent container.
     render() {
         return (
-            <View style={styles.container}>
-                <Text style={styles.title}>Demo</Text>
-                <Text style={styles.subTitle}>This demo will only work within the flipkart android app ultra's container. Click on Get Token button to request a token.</Text>
-                <TextInput
-                    style={styles.permissionInput}
-                    onChangeText={(text) => this.setState({ text })}
-                    value={this.state.text}
-                />
-                <Text style={{ marginLeft: 16, marginRight: 16, marginBottom: 0, fontSize: 14 }}> Token output:</Text>
-                <TextInput
-                    style={styles.permissionInput}
-                    onChangeText={(text) => this.setState({ tokenOutput: text })}
-                    value={this.state.tokenOutput}
-                />
-                <TouchableHighlight style={styles.getToken} onPress={this.getPermission}>
-                    <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
-                        Get Token
+            <ScrollView>
+                <View style={styles.container}>
+                    <Text style={styles.title}>Demo</Text>
+                    <Text style={styles.subTitle}>This demo will only work within the flipkart android app ultra's container. Click on Get Token button to request a token.</Text>
+                    <Text style={{ fontSize: 14, margin: 12, marginBottom: 12 }}>Permission scope: </Text>
+                    <TextInput
+                        style={[styles.permissionInput, { marginTop: 0 }]}
+                        onChangeText={(text) => this.setState({ text })}
+                        value={this.state.text}
+                    />
+                    <Text style={{ marginLeft: 16, marginRight: 16, marginBottom: 0, fontSize: 14 }}> Token output:</Text>
+                    <TextInput
+                        style={styles.permissionInput}
+                        onChangeText={(text) => this.setState({ tokenOutput: text })}
+                        value={this.state.tokenOutput}
+                    />
+                    <TouchableHighlight style={styles.getToken} onPress={this.getPermission}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Get Token
                     </Text>
-                </TouchableHighlight>
-                <TouchableHighlight style={styles.getToken} onPress={this.exitSession}>
-                    <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
-                        Exit Session
+                    </TouchableHighlight>
+                    <Text style={{ fontSize: 14, margin: 12, marginBottom: 12 }}>Access token: </Text>
+                    <TextInput
+                        style={[styles.permissionInput, { marginTop: 0 }]}
+                        onChangeText={(text) => this.setState({ accessToken: text })}
+                        value={this.state.accessToken}
+                    />
+                    <TouchableHighlight style={styles.getToken} onPress={this.getPaymentToken}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Get Payment token
                     </Text>
-                </TouchableHighlight>
-                <TouchableHighlight style={styles.getToken} onPress={this.exitToHomePage}>
-                    <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
-                        Exit to Home
+                    </TouchableHighlight>
+                    <Text style={{ fontSize: 14, margin: 12, marginBottom: 12 }}>Payment token: </Text>
+                    <TextInput
+                        style={[styles.permissionInput, { marginTop: 0 }]}
+                        onChangeText={(text) => this.setState({ paymentToken: text })}
+                        value={this.state.paymentToken}
+                    />
+                    <TouchableHighlight style={styles.getToken} onPress={this.startPayment}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Start Payment
                     </Text>
-                </TouchableHighlight>
-                <TouchableHighlight style={styles.getToken} onPress={this.pickContact}>
-                    <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
-                        Pick Contacts
+                    </TouchableHighlight>
+                    <TouchableHighlight style={styles.getToken} onPress={this.exitSession}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Exit Session
                     </Text>
-                </TouchableHighlight>
-                <TextInput
-                    style={styles.permissionInput}
-                    onChangeText={(text) => this.setState({ contact: text })}
-                    value={this.state.contact}
-                />
-            </View>
+                    </TouchableHighlight>
+                    <TouchableHighlight style={styles.getToken} onPress={this.exitToHomePage}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Exit to Home
+                    </Text>
+                    </TouchableHighlight>
+                    <TouchableHighlight style={styles.getToken} onPress={this.pickContact}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Pick Contacts
+                    </Text>
+                    </TouchableHighlight>
+                    <TextInput
+                        style={styles.permissionInput}
+                        onChangeText={(text) => this.setState({ contact: text })}
+                        value={this.state.contact}
+                    />
+                    <Text style={{ fontSize: 14, margin: 12, marginBottom: 12 }}>Information to store: </Text>
+                    <TextInput
+                        style={[styles.permissionInput, { marginTop: 0 }]}
+                        onChangeText={(text) => this.setState({ storedInfo: text })}
+                        value={this.state.storedInfo}
+                    />
+                    <TouchableHighlight style={styles.getToken} onPress={this.storeInformation}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Store information
+                    </Text>
+                    </TouchableHighlight>
+                    <TextInput
+                        style={[styles.permissionInput, { marginTop: 0 }]}
+                        onChangeText={(text) => this.setState({ storedKey: text })}
+                        value={this.state.storedKey}
+                    />
+                    <TouchableHighlight style={styles.getToken} onPress={this.getInformation}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Retrieve information
+                    </Text>
+                    </TouchableHighlight>
+                </View>
+            </ScrollView>
         );
     }
 
-    componentDidMount() {
-        BackHandler.addEventListener('hardwareBackPress', function () {
-            // this.onMainScreen and this.goBack are just examples, you need to use your own implementation here
-            // Typically you would use the navigator here to go to the last state.
-
-            return false;
+    getPermission = async () => {
+        let scopeReq = this.state.text;
+        this.setState({
+            tokenOutput: 'fetching grant token...'
+        });
+        let grantToken = await this.userResouceHelper.getTokenForCreds(scopeReq);
+        this.setState({
+            tokenOutput: 'fetching identity token...'
+        });
+        let tokens = await this.userResouceHelper.getIdentityToken(grantToken);
+        let userInfoScope = ["user.mobile", "user.email", "user.accountId"];
+        this.setState({
+            tokenOutput: 'fetching user information...',
+            accessToken: tokens.accessToken
+        });
+        let userInfo = await this.userResouceHelper.getUserInfo(userInfoScope, tokens.accessToken);
+        this.setState({
+            tokenOutput: JSON.stringify(userInfo)
         });
     }
 
-    getPermission() {
-        let scopeReq = this.state.text;
-        // this.fkPlatform.getModuleHelper().getPermissionsModule().getToken(JSON.parse(scopeReq)).then(
-        //     function (e) {
-        //         console.log("Your grant token is: " + e.grantToken);
-        //         this.setState({
-        //             tokenOutput: e.grantToken
-        //         });
-        //     }.bind(this)).catch(
-        //         function (e) {
-        //             console.log(e.message);
-        //             this.setState({
-        //                 tokenOutput: e.message
-        //             });
-        //         }.bind(this));
-        this.userResouceHelper.getToken(scopeReq, this.stateChange);
-    }
-
-    exitSession() {
+    exitSession = () => {
         let navigationModule = this.fkPlatform.getModuleHelper().getNavigationModule();
         navigationModule.exitSession();
     }
 
-    exitToHomePage() {
+    exitToHomePage = () => {
         let navigationModule = this.fkPlatform.getModuleHelper().getNavigationModule();
         navigationModule.exitToHomePage();
     }
 
-    pickContact() {
-        let contactModule = this.fkPlatform.getModuleHelper().getContactsModule()
-        contactModule.pickPhoneNumber().then(function (response) {
+    pickContact = async () => {
+        let contactModule = this.fkPlatform.getModuleHelper().getContactsModule();
+        let response;
+        try {
+            response = (await contactModule.pickPhoneNumber()).result;
+        } catch (e) {
+            response = e.message
+        }
+        this.setState({
+            contact: response
+        });
+    }
+
+    getPaymentToken = async () => {
+        let paymentToken = await this.userResouceHelper.startPayment(this.state.accessToken);
+        this.setState({
+            paymentToken: paymentToken
+        });
+    }
+
+    startPayment = () => {
+        this.userResouceHelper.openPayments(this.state.paymentToken);
+    }
+
+    storeInformation = async () => {
+        try {
+            let storedInfo = JSON.parse(this.state.storedInfo);
+            await AsyncStorage.setItem(storedInfo.key, storedInfo.value);
+        } catch (e) {
             this.setState({
-                contact: JSON.stringify(response.result)
+                storedInfo: JSON.stringify(e)
             });
-        }.bind(this));
+        }
+    }
+
+    getInformation = async () => {
+        try {
+            let response = await AsyncStorage.getItem(this.state.storedKey);
+            this.setState({
+                storedInfo: JSON.stringify({
+                    key: this.state.storedKey,
+                    value: response
+                })
+            });
+        } catch (e) {
+            this.setState({
+                storedInfo: JSON.stringify(e)
+            });
+        }
     }
 }
 const styles = StyleSheet.create({
