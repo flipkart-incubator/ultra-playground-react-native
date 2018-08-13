@@ -14,7 +14,7 @@ export default class Demo extends Component {
             text: '[{"scope":"user.email","isMandatory":true,"shouldVerify":false},{"scope":"user.mobile","isMandatory":false,"shouldVerify":false},{"scope":"user.name","isMandatory":false,"shouldVerify":false}]',
             tokenOutput: '',
             contact: '',
-            accessToken: '',
+            identityToken: '',
             paymentToken: '',
             storedInfo: JSON.stringify({
                 key: 'key',
@@ -53,8 +53,8 @@ export default class Demo extends Component {
                     <Text style={{ fontSize: 14, margin: 12, marginBottom: 12 }}>Access token: </Text>
                     <TextInput
                         style={[styles.permissionInput, { marginTop: 0 }]}
-                        onChangeText={(text) => this.setState({ accessToken: text })}
-                        value={this.state.accessToken}
+                        onChangeText={(text) => this.setState({ identityToken: text })}
+                        value={this.state.identityToken}
                     />
                     <TouchableHighlight style={styles.getToken} onPress={this.getPaymentToken}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
@@ -131,7 +131,7 @@ export default class Demo extends Component {
         let userInfoScope = ["user.mobile", "user.email", "user.accountId"];
         this.setState({
             tokenOutput: 'fetching user information...',
-            accessToken: tokens.accessToken
+            identityToken: tokens.identityToken
         });
         let userInfo = await this.userResouceHelper.getUserInfo(userInfoScope, tokens.accessToken);
         this.setState({
@@ -163,7 +163,7 @@ export default class Demo extends Component {
     }
 
     getPaymentToken = async () => {
-        let paymentToken = await this.userResouceHelper.startPayment(this.state.accessToken);
+        let paymentToken = await this.userResouceHelper.startPayment(this.state.identityToken);
         this.setState({
             paymentToken: paymentToken
         });
