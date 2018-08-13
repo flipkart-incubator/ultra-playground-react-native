@@ -188,7 +188,10 @@ export default class Demo extends Component {
         try {
             let response = await AsyncStorage.getItem(this.state.storedKey);
             this.setState({
-                storedInfo: response.result
+                storedInfo: JSON.stringify({
+                    key: this.state.storedKey,
+                    value: response
+                })
             });
         } catch (e) {
             this.setState({
