@@ -50,7 +50,7 @@ export default class Demo extends Component {
                             Get Token
                     </Text>
                     </TouchableHighlight>
-                    <Text style={{ fontSize: 14, margin: 12, marginBottom: 12 }}>Access token: </Text>
+                    <Text style={{ fontSize: 14, margin: 12, marginBottom: 12 }}>Identity token: </Text>
                     <TextInput
                         style={[styles.permissionInput, { marginTop: 0 }]}
                         onChangeText={(text) => this.setState({ identityToken: text })}
@@ -147,6 +147,7 @@ export default class Demo extends Component {
     exitToHomePage = () => {
         let navigationModule = this.fkPlatform.getModuleHelper().getNavigationModule();
         navigationModule.exitToHomePage();
+        this.fkPlatform.getModuleHelper().getNavigationModule().notifyPageLocationChange()
     }
 
     pickContact = async () => {
