@@ -20,7 +20,7 @@ export default class Demo extends Component {
                 key: 'key',
                 value: 'value'
             }),
-            navigateToFlipkartUrl: 'fapp://action?value={"params": {"screenName": "LOCKED_COINS","valid":true},"screenType": "multiWidgetPage","type":"NAVIGATION","url": "locked-coins"}',
+            navigateToFlipkartUrl: 'fapp://action?value={"params": {"screenName": "LOCKED_COINS","valid":true},"screenType": "multiWidgetPage","type":"NAVIGATION","url": "/locked-coins"}',
             storedKey: 'key'
         };
         this.fkPlatform = new FKPlatform("playground");
