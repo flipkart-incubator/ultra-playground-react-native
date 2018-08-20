@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TouchableHighlight, TextInput, Text, BackHandler, ScrollView, AsyncStorage } from 'react-native';
+import { View, StyleSheet, TouchableHighlight, TextInput, Text, BackHandler, ScrollView, AsyncStorage, Linking } from 'react-native';
 import FKPlatform from "fk-platform-sdk"
 import LinearGradient from 'react-native-linear-gradient';
 import UserResourceHelper from './UserResourceHelper';
@@ -20,6 +20,7 @@ export default class Demo extends Component {
                 key: 'key',
                 value: 'value'
             }),
+            navigateToFlipkartUrl: 'fapp://action?value={"params": {"screenName": "LOCKED_COINS","valid":true},"screenType": "multiWidgetPage","type":"NAVIGATION","url": "locked-coins"}',
             storedKey: 'key'
         };
         this.fkPlatform = new FKPlatform("playground");
@@ -80,13 +81,32 @@ export default class Demo extends Component {
                     <TouchableHighlight style={styles.getToken} onPress={this.exitToHomePage}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
                             Exit to Home
-                    </Text>
+                        </Text>
                     </TouchableHighlight>
                     <TouchableHighlight style={styles.getToken} onPress={this.pickContact}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
                             Pick Contacts
-                    </Text>
+                        </Text>
                     </TouchableHighlight>
+
+                    <TouchableHighlight style={styles.getToken} onPress={this.sendSms}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Send SMS
+                        </Text>
+                    </TouchableHighlight>
+
+                    <TouchableHighlight style={styles.getToken} onPress={this.callNumber}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Call Number
+                        </Text>
+                    </TouchableHighlight>
+
+                    <TouchableHighlight style={styles.getToken} onPress={this.sendEmail}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Send Email
+                        </Text>
+                    </TouchableHighlight>
+
                     <TextInput
                         style={styles.permissionInput}
                         onChangeText={(text) => this.setState({ contact: text })}
@@ -100,8 +120,8 @@ export default class Demo extends Component {
                     />
                     <TouchableHighlight style={styles.getToken} onPress={this.storeInformation}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
-                            Store information
-                    </Text>
+                            AsyncStorage Set
+                        </Text>
                     </TouchableHighlight>
                     <TextInput
                         style={[styles.permissionInput, { marginTop: 0 }]}
@@ -110,8 +130,19 @@ export default class Demo extends Component {
                     />
                     <TouchableHighlight style={styles.getToken} onPress={this.getInformation}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
-                            Retrieve information
-                    </Text>
+                        AsyncStorage Get
+                        </Text>
+                    </TouchableHighlight>
+
+                    <TextInput
+                        style={[styles.permissionInput, { marginTop: 0 }]}
+                        onChangeText={(text) => this.setState({ navigateToFlipkartUrl: text })}
+                        value={this.state.navigateToFlipkartUrl}
+                    />
+                    <TouchableHighlight style={styles.getToken} onPress={this.navigateToFlipkart}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Navigate To Flipkart
+                        </Text>
                     </TouchableHighlight>
                 </View>
             </ScrollView>
@@ -142,6 +173,11 @@ export default class Demo extends Component {
     exitSession = () => {
         let navigationModule = this.fkPlatform.getModuleHelper().getNavigationModule();
         navigationModule.exitSession();
+    }
+
+    navigateToFlipkart = () => {
+        let navigationModule = this.fkPlatform.getModuleHelper().getNavigationModule();
+        navigationModule.navigateToFlipkart(this.state.navigateToFlipkartUrl);
     }
 
     exitToHomePage = () => {
@@ -200,7 +236,20 @@ export default class Demo extends Component {
             });
         }
     }
+
+    sendSms = async() => {
+        Linking.openURL('smsto:8888888888');
+    }
+
+    callNumber = async() => {
+        Linking.openURL('tel:8888888888');
+    }
+
+    sendEmail = async() => {
+        Linking.openURL('mailto:abc@gmail.com');
+    }
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
