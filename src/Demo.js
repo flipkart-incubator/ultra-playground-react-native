@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TouchableHighlight, TextInput, Text, BackHandler, ScrollView, AsyncStorage, Linking, ToastAndroid } from 'react-native';
+import { View, StyleSheet, TouchableHighlight, TextInput, Text, NativeModules, ScrollView, AsyncStorage, Linking, ToastAndroid, DeviceEventEmitter } from 'react-native';
 import FKPlatform from "fk-platform-sdk"
-import LinearGradient from 'react-native-linear-gradient';
 import UserResourceHelper from './UserResourceHelper';
 
 export default class Demo extends Component {
@@ -295,7 +294,12 @@ export default class Demo extends Component {
     }
 
     startPhonePePayment = () => {
-        ToastAndroid.show('not supported yet !!', ToastAndroid.SHORT);
+        // debugger;
+        NativeModules.PhonePeModule.startPayment("test",'{"redirectURL":"/app","gatewayURL":"/app","params":[{"key":"token","value":"'+this.state.phonePeToken+'"}],"package":null}',"onPhonePe")
+        // ToastAndroid.show('not supported yet !!', ToastAndroid.SHORT);
+        DeviceEventEmitter.addListener("loadUri",(response) => {
+              ToastAndroid.show(response.loadUri, ToastAndroid.SHORT);
+        })
     }
 
     storeInformation = async () => {
