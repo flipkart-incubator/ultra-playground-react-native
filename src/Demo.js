@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TouchableHighlight, TextInput, Text, NativeModules, ScrollView, AsyncStorage, Linking, ToastAndroid, DeviceEventEmitter } from 'react-native';
+import { CameraRoll, View, StyleSheet, TouchableHighlight, TextInput, Text, NativeModules, ScrollView, AsyncStorage, Linking, ToastAndroid, DeviceEventEmitter, Geolocation, PermissionsAndroid } from 'react-native';
 import FKPlatform from "fk-platform-sdk"
 import UserResourceHelper from './UserResourceHelper';
 
@@ -23,8 +23,11 @@ export default class Demo extends Component {
                 value: 'john'
             }),
             asyncStorageFetchResult: '',
+            coordinates: '',
+            permissions: ['android.permission.ACCESS_FINE_LOCATION', 'android.permission.READ_CALENDAR'],
             asyncStorageKeyToFetch: 'name',
             notifyPageLocationChangeUrl: 'https://www.flipkart.com',
+            observingLocation: '',
             navigateToFlipkartUrl: 'fapp://action?value={"params": {"screenName": "LOCKED_COINS","valid":true},"screenType": "multiWidgetPage","type":"NAVIGATION","url": "/locked-coins"}',
         };
         this.fkPlatform = new FKPlatform("playground");
@@ -208,6 +211,55 @@ export default class Demo extends Component {
                             Notify Page Location Changed
                         </Text>
                     </TouchableHighlight>
+
+                    {/** Location **/}
+                    <Text style={styles.title}>Location</Text>
+                    <TouchableHighlight style={styles.buttonContainer} onPress={this.requestLocation}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Get location permission
+                        </Text>
+                    </TouchableHighlight>
+
+                    <TouchableHighlight style={[styles.buttonContainer, {marginTop: 8}]} onPress={this.fetchLocation}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Fetch user location
+                        </Text>
+                    </TouchableHighlight>
+                    <Text style={[styles.permissionInput, { marginTop: 8 }]}>{this.state.coordinates}</Text>
+
+                    <TouchableHighlight style={[styles.buttonContainer, {marginTop: 8}]} onPress={this.startObservingLocation}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Start observing location
+                        </Text>
+                    </TouchableHighlight>
+                    <Text style={[styles.permissionInput, { marginTop: 8 }]}>{this.state.observingLocation}</Text>
+                
+                    {/** Camera **/}
+                    <Text style={styles.title}>Camera roll</Text>
+                    <TouchableHighlight style={styles.buttonContainer} onPress={this.getPhotos}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Get Photos
+                        </Text>
+                    </TouchableHighlight>
+
+                    <TouchableHighlight style={styles.buttonContainer} onPress={this.savePhotos}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Save Photos
+                        </Text>
+                    </TouchableHighlight>
+                    
+                    {/** Permissions **/}
+                    <Text style={styles.title}>Permissions</Text>
+                    <TextInput
+                        style={[styles.permissionInput, { marginTop: 0 }]}
+                        onChangeText={(text) => this.setState({ permissions: text })}
+                        value={JSON.stringify(this.state.permissions)}
+                    />
+                    <TouchableHighlight style={styles.buttonContainer} onPress={this.getPermissions}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Get Permissions
+                        </Text>
+                    </TouchableHighlight>
                 </View>
             </ScrollView>
         );
@@ -341,6 +393,40 @@ export default class Demo extends Component {
 
     sendEmail = async() => {
         Linking.openURL('mailto:abc@gmail.com');
+    }
+
+    requestLocation = () => {
+        PermissionsAndroid.request("android.permission.ACCESS_FINE_LOCATION");
+    }
+
+    fetchLocation = () => {
+        navigator.geolocation.getCurrentPosition((success) => {
+            this.setState({
+                coordinates: success.coords.latitude + " : " + success.coords.longitude
+            })
+        })
+    }
+
+    startObservingLocation = () => {
+        navigator.geolocation.watchPosition((success) => {
+            this.setState( {
+                observingLocation: success.coords.latitude + " : " + success.coords.longitude
+            })
+        })
+    }
+
+    getPhotos = () => {
+        CameraRoll.getPhotos({
+            first: 1
+        })
+    }
+
+    savePhotos = () => {
+        CameraRoll.saveToCameraRoll('test')
+    }
+
+    getPermissions = () => {
+        PermissionsAndroid.requestMultiple(this.state.permissions)
     }
 }
 
