@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { CameraRoll, View, StyleSheet, TouchableHighlight, TextInput, Text, NativeModules, ScrollView, AsyncStorage, Linking, ToastAndroid, DeviceEventEmitter, Geolocation, PermissionsAndroid } from 'react-native';
 import FKPlatform from "fk-platform-sdk"
 import UserResourceHelper from './UserResourceHelper';
+import { CheckBox } from 'react-native-elements'
 
 export default class Demo extends Component {
     //Designed Calender root as a component that is reusable and not tightly knit with the application
@@ -24,7 +25,16 @@ export default class Demo extends Component {
             }),
             asyncStorageFetchResult: '',
             coordinates: '',
-            permissions: ['android.permission.ACCESS_FINE_LOCATION', 'android.permission.READ_CALENDAR'],
+            permissionsList: [
+            'android.permission.ACCESS_WIFI_STATE',
+            'android.permission.ACCESS_FINE_LOCATION', 
+            'android.permission.READ_CALENDAR',
+            'android.permission.BLUETOOTH',
+            'android.permission.CAMERA',
+            'android.permission.READ_CALL_LOG',
+            'android.permission.READ_SMS',
+            'android.permission.ACCESS_COARSE_LOCATION'],
+            permissions: [],
             asyncStorageKeyToFetch: 'name',
             notifyPageLocationChangeUrl: 'https://www.flipkart.com',
             observingLocation: '',
@@ -241,20 +251,17 @@ export default class Demo extends Component {
                             Get Photos
                         </Text>
                     </TouchableHighlight>
-
-                    <TouchableHighlight style={styles.buttonContainer} onPress={this.savePhotos}>
-                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
-                            Save Photos
-                        </Text>
-                    </TouchableHighlight>
                     
                     {/** Permissions **/}
                     <Text style={styles.title}>Permissions</Text>
-                    <TextInput
-                        style={[styles.permissionInput, { marginTop: 0 }]}
-                        onChangeText={(text) => this.setState({ permissions: text })}
-                        value={JSON.stringify(this.state.permissions)}
-                    />
+                    {this.state.permissionsList.map(permission => {
+                        return <CheckBox
+                            title={permission}
+                            key={permission}
+                            checked={this.state.permissions.indexOf(permission) > -1}
+                            onPress={() => this.onPermissionChecked(permission)}
+                        />
+                    })}
                     <TouchableHighlight style={styles.buttonContainer} onPress={this.getPermissions}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
                             Get Permissions
@@ -263,6 +270,23 @@ export default class Demo extends Component {
                 </View>
             </ScrollView>
         );
+    }
+
+    onPermissionChecked = (permission) => {
+        const grantedPerms = []
+        this.state.permissions.map((perm) => {
+            grantedPerms.push(perm)
+        })
+        const index = grantedPerms.indexOf(permission);
+        const notInList = index === -1
+        if (notInList) {
+            grantedPerms.push(permission)
+            this.setState({ permissions: grantedPerms })
+        } else {
+            if (index > -1) {
+                this.setState({ permissions: grantedPerms.filter(item => item !== permission) })
+            }
+        }
     }
 
     getPermission = async () => {
@@ -419,10 +443,6 @@ export default class Demo extends Component {
         CameraRoll.getPhotos({
             first: 1
         })
-    }
-
-    savePhotos = () => {
-        CameraRoll.saveToCameraRoll('test')
     }
 
     getPermissions = () => {
