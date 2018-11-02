@@ -8,6 +8,8 @@ export default class Demo extends Component {
     //Designed Calender root as a component that is reusable and not tightly knit with the application
     //Any other view or navigator can load it up, this not unnecessarily adding a nav library to the project
 
+    locationWatchId; //for caching watch id across renders
+
     constructor(props) {
         super(props);
         this.state = {
@@ -38,6 +40,7 @@ export default class Demo extends Component {
             asyncStorageKeyToFetch: 'name',
             notifyPageLocationChangeUrl: 'https://www.flipkart.com',
             observingLocation: '',
+            isObservingLocation : false,
             navigateToFlipkartUrl: 'fapp://action?value={"params": {"screenName": "LOCKED_COINS","valid":true},"screenType": "multiWidgetPage","type":"NAVIGATION","url": "/locked-coins"}',
         };
         this.fkPlatform = new FKPlatform("playground");
@@ -428,15 +431,34 @@ export default class Demo extends Component {
             this.setState({
                 coordinates: success.coords.latitude + " : " + success.coords.longitude
             })
+        }, (positionError) => {
+            this.setState({
+                coordinates: positionError.message
+            })
         })
     }
 
     startObservingLocation = () => {
-        navigator.geolocation.watchPosition((success) => {
-            this.setState( {
-                observingLocation: success.coords.latitude + " : " + success.coords.longitude
+        if(!this.state.isObservingLocation) {
+            this.locationWatchId = navigator.geolocation.watchPosition((success) => {
+                this.setState( {
+                    observingLocation: success.coords.latitude + " : " + success.coords.longitude,
+                    isObservingLocation: true
+                })
+            }, (positionError) => {
+                navigator.geolocation.clearWatch(this.locationWatchId);
+                this.setState({
+                    observingLocation: positionError.message,
+                    isObservingLocation: false
+                })
             })
-        })
+        } else {
+            navigator.geolocation.clearWatch(this.locationWatchId);
+            this.locationWatchId = undefined;
+            this.setState({
+                isObservingLocation: false
+            });
+        }
     }
 
     getPhotos = () => {
