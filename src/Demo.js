@@ -332,7 +332,7 @@ export default class Demo extends Component {
     exitToHomePage = () => {
         let navigationModule = this.fkPlatform.getModuleHelper().getNavigationModule();
         navigationModule.exitToHomePage();
-        this.fkPlatform.getModuleHelper().getNavigationModule().notifyPageLocationChange()
+        this.fkPlatform.getModuleHelper().getNavigationModule().notifyPageLocationChange(this.state.notifyPageLocationChangeUrl, false)
     }
 
     pickContact = async () => {
