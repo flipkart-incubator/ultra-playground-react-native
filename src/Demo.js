@@ -3,6 +3,7 @@ import { CameraRoll, View, StyleSheet, TouchableHighlight, TextInput, Text, Nati
 import FKPlatform from "fk-platform-sdk"
 import UserResourceHelper from './UserResourceHelper';
 import { CheckBox } from 'react-native-elements'
+import { Travel } from "fk-platform-sdk/analytics";
 
 export default class Demo extends Component {
     //Designed Calender root as a component that is reusable and not tightly knit with the application
@@ -28,19 +29,19 @@ export default class Demo extends Component {
             asyncStorageFetchResult: '',
             coordinates: '',
             permissionsList: [
-            'android.permission.ACCESS_WIFI_STATE',
-            'android.permission.ACCESS_FINE_LOCATION', 
-            'android.permission.READ_CALENDAR',
-            'android.permission.BLUETOOTH',
-            'android.permission.CAMERA',
-            'android.permission.READ_CALL_LOG',
-            'android.permission.READ_SMS',
-            'android.permission.ACCESS_COARSE_LOCATION'],
+                'android.permission.ACCESS_WIFI_STATE',
+                'android.permission.ACCESS_FINE_LOCATION',
+                'android.permission.READ_CALENDAR',
+                'android.permission.BLUETOOTH',
+                'android.permission.CAMERA',
+                'android.permission.READ_CALL_LOG',
+                'android.permission.READ_SMS',
+                'android.permission.ACCESS_COARSE_LOCATION'],
             permissions: [],
             asyncStorageKeyToFetch: 'name',
             notifyPageLocationChangeUrl: 'https://www.flipkart.com',
             observingLocation: '',
-            isObservingLocation : false,
+            isObservingLocation: false,
             navigateToFlipkartUrl: 'fapp://action?value={"params": {"screenName": "LOCKED_COINS","valid":true},"screenType": "multiWidgetPage","type":"NAVIGATION","url": "/locked-coins"}',
         };
         this.fkPlatform = new FKPlatform("playground");
@@ -71,7 +72,7 @@ export default class Demo extends Component {
                             Get Token
                         </Text>
                     </TouchableHighlight>
-                    
+
                     {/** Identity Token **/}
                     <Text style={{ fontSize: 14, marginBottom: 12, marginTop: 12 }}>Identity token: </Text>
                     <TextInput
@@ -84,7 +85,7 @@ export default class Demo extends Component {
                             Get Payment token
                     </Text>
                     </TouchableHighlight>
-                    
+
                     {/** JusPay Payments **/}
                     <Text style={styles.title}>JusPay Payment</Text>
                     <Text style={{ fontSize: 14, marginBottom: 12 }}>Token:</Text>
@@ -120,12 +121,12 @@ export default class Demo extends Component {
                             Exit Session
                         </Text>
                     </TouchableHighlight>
-                    <TouchableHighlight style={[styles.buttonContainer, {marginTop: 8}]} onPress={this.exitToHomePage}>
+                    <TouchableHighlight style={[styles.buttonContainer, { marginTop: 8 }]} onPress={this.exitToHomePage}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
                             Exit to Home
                         </Text>
                     </TouchableHighlight>
-                
+
                     {/** Pick Contacts **/}
                     <Text style={styles.title}>Pick Contact</Text>
                     <TouchableHighlight style={styles.buttonContainer} onPress={this.pickContact}>
@@ -160,13 +161,13 @@ export default class Demo extends Component {
                         </Text>
                     </TouchableHighlight>
 
-                    <TouchableHighlight style={[styles.buttonContainer, {marginTop: 8}]} onPress={this.callNumber}>
+                    <TouchableHighlight style={[styles.buttonContainer, { marginTop: 8 }]} onPress={this.callNumber}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
                             Call a number
                         </Text>
                     </TouchableHighlight>
 
-                    <TouchableHighlight style={[styles.buttonContainer, {marginTop: 8}]} onPress={this.sendEmail}>
+                    <TouchableHighlight style={[styles.buttonContainer, { marginTop: 8 }]} onPress={this.sendEmail}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
                             Send Email
                         </Text>
@@ -233,20 +234,20 @@ export default class Demo extends Component {
                         </Text>
                     </TouchableHighlight>
 
-                    <TouchableHighlight style={[styles.buttonContainer, {marginTop: 8}]} onPress={this.fetchLocation}>
+                    <TouchableHighlight style={[styles.buttonContainer, { marginTop: 8 }]} onPress={this.fetchLocation}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
                             Fetch user location
                         </Text>
                     </TouchableHighlight>
                     <Text style={[styles.permissionInput, { marginTop: 8 }]}>{this.state.coordinates}</Text>
 
-                    <TouchableHighlight style={[styles.buttonContainer, {marginTop: 8}]} onPress={this.startObservingLocation}>
+                    <TouchableHighlight style={[styles.buttonContainer, { marginTop: 8 }]} onPress={this.startObservingLocation}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
                             Start observing location
                         </Text>
                     </TouchableHighlight>
                     <Text style={[styles.permissionInput, { marginTop: 8 }]}>{this.state.observingLocation}</Text>
-                
+
                     {/** Camera **/}
                     <Text style={styles.title}>Camera roll</Text>
                     <TouchableHighlight style={styles.buttonContainer} onPress={this.getPhotos}>
@@ -254,7 +255,7 @@ export default class Demo extends Component {
                             Get Photos
                         </Text>
                     </TouchableHighlight>
-                    
+
                     {/** Permissions **/}
                     <Text style={styles.title}>Permissions</Text>
                     {this.state.permissionsList.map(permission => {
@@ -268,6 +269,11 @@ export default class Demo extends Component {
                     <TouchableHighlight style={styles.buttonContainer} onPress={this.getPermissions}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
                             Get Permissions
+                        </Text>
+                    </TouchableHighlight>
+                    <TouchableHighlight style={styles.buttonContainer} onPress={this.sendBreadcrumbEvent}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Send Breadcrumb Event
                         </Text>
                     </TouchableHighlight>
                 </View>
@@ -348,7 +354,7 @@ export default class Demo extends Component {
         });
     }
 
-    fetchContacts = async() => {
+    fetchContacts = async () => {
         let contactModule = this.fkPlatform.getModuleHelper().getContactsModule();
         let response;
         try {
@@ -374,10 +380,10 @@ export default class Demo extends Component {
 
     startPhonePePayment = () => {
         // debugger;
-        NativeModules.PhonePeModule.startPayment("test",'{"redirectURL":"/app","gatewayURL":"/app","params":[{"key":"token","value":"'+this.state.phonePeToken+'"}],"package":null}',"onPhonePe")
+        NativeModules.PhonePeModule.startPayment("test", '{"redirectURL":"/app","gatewayURL":"/app","params":[{"key":"token","value":"' + this.state.phonePeToken + '"}],"package":null}', "onPhonePe")
         // ToastAndroid.show('not supported yet !!', ToastAndroid.SHORT);
-        DeviceEventEmitter.addListener("loadUri",(response) => {
-              ToastAndroid.show(response.loadUri, ToastAndroid.SHORT);
+        DeviceEventEmitter.addListener("loadUri", (response) => {
+            ToastAndroid.show(response.loadUri, ToastAndroid.SHORT);
         })
     }
 
@@ -410,15 +416,15 @@ export default class Demo extends Component {
         }
     }
 
-    sendSms = async() => {
+    sendSms = async () => {
         Linking.openURL('smsto:8888888888');
     }
 
-    callNumber = async() => {
+    callNumber = async () => {
         Linking.openURL('tel:8888888888');
     }
 
-    sendEmail = async() => {
+    sendEmail = async () => {
         Linking.openURL('mailto:abc@gmail.com');
     }
 
@@ -439,9 +445,9 @@ export default class Demo extends Component {
     }
 
     startObservingLocation = () => {
-        if(!this.state.isObservingLocation) {
+        if (!this.state.isObservingLocation) {
             this.locationWatchId = navigator.geolocation.watchPosition((success) => {
-                this.setState( {
+                this.setState({
                     observingLocation: success.coords.latitude + " : " + success.coords.longitude,
                     isObservingLocation: true
                 })
@@ -469,6 +475,11 @@ export default class Demo extends Component {
 
     getPermissions = () => {
         PermissionsAndroid.requestMultiple(this.state.permissions)
+    }
+
+    sendBreadcrumbEvent = () => {
+        const search = new Travel.Search("BLR", ["DEL"], [new Date()], false, 1);
+        this.fkPlatform.getModuleHelper().getAnalyticsModule().pushEvent(search);
     }
 }
 
