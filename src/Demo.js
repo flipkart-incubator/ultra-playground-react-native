@@ -271,9 +271,25 @@ export default class Demo extends Component {
                             Get Permissions
                         </Text>
                     </TouchableHighlight>
-                    <TouchableHighlight style={styles.buttonContainer} onPress={this.sendBreadcrumbEvent}>
+                    <Text style={styles.title}>Events</Text>
+                    <TouchableHighlight style={styles.buttonContainer} onPress={this.sendTravelSearchBreadcrumbEvent}>
                         <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
-                            Send Breadcrumb Event
+                            Send Travel-Search Event
+                        </Text>
+                    </TouchableHighlight>
+                    <TouchableHighlight style={styles.buttonContainer} onPress={this.sendTravelSelectBreadcrumbEvent}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Send Travel-Select Event
+                        </Text>
+                    </TouchableHighlight>
+                    <TouchableHighlight style={styles.buttonContainer} onPress={this.sendTravelPayBreadcrumbEvent}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Send Travel-Pay Event
+                        </Text>
+                    </TouchableHighlight>
+                    <TouchableHighlight style={styles.buttonContainer} onPress={this.sendInvalidEvent}>
+                        <Text style={{ flexDirection: 'row', justifyContent: 'center', alignSelf: 'center', color: 'white', fontSize: 14 }}>
+                            Send Invalid Event
                         </Text>
                     </TouchableHighlight>
                 </View>
@@ -477,8 +493,23 @@ export default class Demo extends Component {
         PermissionsAndroid.requestMultiple(this.state.permissions)
     }
 
-    sendBreadcrumbEvent = () => {
+    sendTravelSearchBreadcrumbEvent = () => {
         const search = new Travel.Search("BLR", ["DEL"], [new Date()], false, 1);
+        this.fkPlatform.getModuleHelper().getAnalyticsModule().pushEvent(search);
+    }
+
+    sendTravelSelectBreadcrumbEvent = () => {
+        const select = new Travel.Select('john', 'domestic', '12000');
+        this.fkPlatform.getModuleHelper().getAnalyticsModule().pushEvent(select);
+    }
+
+    sendTravelPayBreadcrumbEvent = () => {
+        const payEvent = new Travel.ProceedToPay(12000, 100, 200, 10);
+        this.fkPlatform.getModuleHelper().getAnalyticsModule().pushEvent(payEvent);
+    }
+
+    sendInvalidEvent = () => {
+        const search = new Travel.Search(null, ["DEL"], [new Date()], false, 1);
         this.fkPlatform.getModuleHelper().getAnalyticsModule().pushEvent(search);
     }
 }
