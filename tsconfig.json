@@ -1,0 +1,49 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "es6",
+        "moduleResolution": "node",
+        "jsx": "react-native",
+        "outDir": "lib",
+        "baseUrl": ".",
+        "preserveConstEnums": true,
+        "allowJs": true,
+        "sourceMap": true,
+        "noImplicitReturns": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "strict": true,
+        "removeComments": false,
+        "pretty": true,
+        "typeRoots": [
+            "./types",
+            "./node_modules/@types"
+        ],
+        "paths": {
+            "react-native-web": [
+                "node_modules/@types/react-native"
+            ]
+        }
+    },
+    "include": [
+        "./src/"
+    ],
+    "filesGlob": [
+        "typings/index.d.ts",
+        "src/**/*.ts",
+        "src/**/*.tsx"
+    ],
+    "types": [
+        "react",
+        "react-native",
+        "jest"
+    ],
+    "exclude": [
+        "android",
+        "ios",
+        "build",
+        "node_modules",
+        "typings"
+    ],
+    "compileOnSave": false
+}
