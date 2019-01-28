@@ -141,4 +141,3 @@ export default class UserResouceHelper {
         this.fkPlatform.getModuleHelper().getNavigationModule().startPayment(paymentToken);
     };
 };
-
