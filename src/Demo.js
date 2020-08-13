@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { CameraRoll, View, StyleSheet, TouchableHighlight, TextInput, Text, NativeModules, ScrollView, AsyncStorage, Linking, ToastAndroid, DeviceEventEmitter, Geolocation, PermissionsAndroid } from 'react-native';
+import { CameraRoll, View, StyleSheet, TouchableHighlight, TextInput, Text, NativeModules, ScrollView, AsyncStorage, Linking, ToastAndroid, DeviceEventEmitter, PermissionsAndroid } from 'react-native';
 import FKPlatform from "fk-platform-sdk"
 import UserResourceHelper from './UserResourceHelper';
 import { CheckBox } from 'react-native-elements'
